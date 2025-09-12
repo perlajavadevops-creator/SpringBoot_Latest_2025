@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: html">
+<head>
+    <title>Transfer Money</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>💸 Transfer Money</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="transferNotifications"></div>
+                        
+                        <form id="transferForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fromAccount" class="form-label">From Account</label>
+                                        <select class="form-select" id="fromAccount" required>
+                                            <option value="">Select account</option>
+                                            <option th:each="account : ${accounts}" 
+                                                    th:value="${account.accountNumber}" 
+                                                    th:text="${account.accountType + ' - ' + account.accountNumber + ' (Balance:  th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+                    
+                    <form th:action="@{/auth/login}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a th:href="@{/auth/register}">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

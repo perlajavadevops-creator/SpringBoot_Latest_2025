@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: demo
+    ports:
+      - "3307:3306"  # Host port 3307 → Container port 3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - springnet
+
+  spring-app:
+    image: sp-mvc-demo_employee1:latest
+    container_name: spring-app
+    restart: always
+    depends_on:
+      - mysql-db
+    ports:
+      - "8090:8090"
+    networks:
+      - springnet
+
+volumes:
+  mysql_data:
+
+networks:
+  springnet:

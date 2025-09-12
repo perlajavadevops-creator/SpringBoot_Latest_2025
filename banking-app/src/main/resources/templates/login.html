@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: html">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <div th:fragment="content" class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">🏦 Banking App Login</h3>
+                </div>
+                <div class="card-body">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="submitDeposit()">Deposit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History Modal -->
+        <div class="modal fade" id="historyModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transaction History</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="transactionHistory">
+                            <!-- Transaction history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize WebSocket connection
+        let stompClient = null;
+        let socket = new SockJS('/ws');
+        stompClient = new StompJs.Client({
+            webSocketFactory: () => socket,
+            debug: function (str) {
+                console.log(str);
+            },
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        stompClient.onConnect = function (frame) {
+            console.log('Connected: ' + frame);
+            
+            // Subscribe to balance updates
+            stompClient.subscribe('/user/topic/balance-updates', function (notification) {
+                const data = JSON.parse(notification.body);
+                updateBalance(data.accountNumber, data.balance);
+                showNotification('Balance updated for account ' + data.accountNumber, 'success');
+            });
+
+            // Subscribe to general notifications
+            stompClient.subscribe('/user/topic/notifications', function (notification) {
+                const data = JSON.parse(notification.body);
+                showNotification(data.message, 'info');
+            });
+        };
+
+        stompClient.activate();
+
+        function updateBalance(accountNumber, newBalance) {
+            const balanceElement = document.querySelector(`[data-account="${accountNumber}"]`);
+            if (balanceElement) {
+                balanceElement.textContent = parseFloat(newBalance).toFixed(2);
+            }
+        }
+
+        function showNotification(message, type) {
+            const notificationDiv = document.getElementById('notifications');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            notificationDiv.appendChild(alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        function showDepositModal() {
+            new bootstrap.Modal(document.getElementById('depositModal')).show();
+        }
+
+        function submitDeposit() {
+            const account = document.getElementById('depositAccount').value;
+            const amount = document.getElementById('depositAmount').value;
+            const description = document.getElementById('depositDescription').value;
+
+            if (!account || !amount || amount <= 0) {
+                showNotification('Please fill in all required fields', 'danger');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('accountNumber', account);
+            formData.append('amount', amount);
+            formData.append('description', description || 'Deposit');
+
+            fetch('/transactions/deposit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+                showNotification('Deposit successful!', 'success');
+                document.getElementById('depositForm').reset();
+            })
+            .catch(error => {
+                showNotification('Deposit failed: ' + error.message, 'danger');
+            });
+        }
+
+        function createAccount() {
+            const accountType = prompt('Select account type (SAVINGS, CHECKING, BUSINESS):');
+            if (accountType && ['SAVINGS', 'CHECKING', 'BUSINESS'].includes(accountType.toUpperCase())) {
+                const formData = new FormData();
+                formData.append('accountType', accountType.toUpperCase());
+
+                fetch('/accounts/create', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showNotification('Account created successfully!', 'success');
+                    setTimeout(() => location.reload(), 2000);
+                })
+                .catch(error => {
+                    showNotification('Failed to create account: ' + error.message, 'danger');
+                });
+            }
+        }
+
+        function showTransactionHistory(accountNumber) {
+            fetch(`/transactions/history/${accountNumber}`)
+            .then(response => response.json())
+            .then(transactions => {
+                const historyDiv = document.getElementById('transactionHistory');
+                if (transactions.length === 0) {
+                    historyDiv.innerHTML = '<p>No transactions found.</p>';
+                } else {
+                    let html = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th><th>Status</th></tr></thead><tbody>';
+                    transactions.forEach(transaction => {
+                        html += `<tr>
+                            <td>${new Date(transaction.createdAt).toLocaleDateString()}</td>
+                            <td>${transaction.type}</td>
+                            <td>${parseFloat(transaction.amount).toFixed(2)}</td>
+                            <td>${transaction.description || '-'}</td>
+                            <td><span class="badge bg-${transaction.status === 'COMPLETED' ? 'success' : 'warning'}">${transaction.status}</span></td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    historyDiv.innerHTML = html;
+                }
+                new bootstrap.Modal(document.getElementById('historyModal')).show();
+            })
+            .catch(error => {
+                showNotification('Failed to load transaction history', 'danger');
+            });
+        }
+    </script>
+</body>
+</html>
