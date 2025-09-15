@@ -1,0 +1,44 @@
+hibernate:
+  format_sql: 'true'
+spring:
+  datasource:
+    username: root
+    url: jdbc:mysql://localhost:3306/demo
+    driverClassName: com.mysql.cj.jdbc.Driver
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: 'true'
+
+server:
+  port: 8080
+logging:
+  level:
+    com.banking: DEBUG
+    org.springframework.security: DEBUG
+jwt:
+  secret: dummyscretekey
+  expiration: 2000000
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        #include: health,info,metrics,heapdump,threaddump,env,loggers,beans
+        #In Production
+        include: health,info,metrics,heapdump,threaddump,loggers
+      base-path: /actuator
+  metrics:
+    export:
+      prometheus:
+        enabled: 'true'
+  endpoint:
+    threaddump:
+      enabled: 'true'
+    health:
+      show-details: always
+    metrics:
+      enabled: 'true'
+    heapdump:
+      enabled: 'true'
