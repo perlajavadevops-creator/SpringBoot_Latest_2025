@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<style>
+body {
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+.sidebar {
+	height: 100vh;
+	background-color: #343a40;
+	color: white;
+}
+
+.sidebar a {
+	color: white;
+	text-decoration: none;
+}
+
+.sidebar a:hover {
+	background-color: #495057;
+	display: block;
+}
+</style>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+
+	<div class="container-fluid">
+		<div class="row">
+			<!-- Sidebar -->
+			<nav class="col-md-3 col-lg-2 d-md-block sidebar p-3">
+				<h4 class="text-center">My Dashboard</h4>
+				<ul class="nav flex-column mt-4">
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/api/users/dashboard}">🏠 Home</a></li>
+					<li class="nav-item"><a class="nav-link" th:href="@{/profile}">👤
+							Profiles</a></li>
+					<!--  <li class="nav-item">
+                    <a class="nav-link" th:href="@{/settings}">⚙️ Settings</a>
+                </li> -->
+					<!--  <li class="nav-item">
+                    <a class="nav-link" th:href="@{/logout}">🚪 Logout</a>
+                </li> -->
+				</ul>
+			</nav>
+
+			<!-- Main Content -->
+			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+				<div
+					class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+					<h2>
+						<p>Welcome, <span th:text="${session.username}">User</span>!</p>
+					</h2>
+				</div>
+
+				<div class="row">
+					<div class="col-md-4 mb-3">
+						<div class="card shadow-sm">
+							<div class="card-body">
+								<h5 class="card-title">📊 Analytics</h5>
+								<p class="card-text">View your latest stats and performance
+									metrics.</p>
+								<a href="/viewfile" class="btn btn-primary">View Report</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4 mb-3">
+						<div class="card shadow-sm">
+							<div class="card-body">
+								<h5 class="card-title">📁 Files</h5>
+								<p class="card-text">Manage your uploaded documents and
+									media.</p>
+								<a href="/userfile" class="btn btn-secondary">Manage Files</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="card shadow-sm h-100">
+							<div class="card-body text-center">
+								<i class="bi bi-envelope fs-1 text-primary"></i>
+								<h5 class="card-title mt-3">📬 Messages</h5>
+								<p class="card-text">Send messages and view your inbox.</p>
+								<!-- <a th:href="@{/messages/compose}" class="btn btn-primary">Compose</a>
+								<a th:href="@{/messages/inbox}" class="btn btn-outline-primary">Inbox</a> -->
+								<a th:href="@{/messages/compose}" class="btn btn-primary">Compose</a>
+								<a th:href="@{/messages/inbox}" class="btn btn-outline-primary">Inbox</a>
+
+							</div>
+						</div>
+					</div>
+					<!-- <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">📬 Messages</h5>
+                            <p class="card-text">Check your inbox and respond to messages.</p>
+                            <a href="/messages/compose" class="btn btn-secondary">Messages</a>
+                        </div> 
+                    </div>
+                </div> -->
+				</div>
+			</main>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>
